@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>New Prescription</h2>
+    
+    <!-- {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{% if message.tags %}{{ message.tags }}{% else %}info{% endif %} alert-dismissible fade show">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %} -->
+    
+    <form method="post">
+        {% csrf_token %}
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4>Patient Information</h4>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="{{ prescription_form.patient.id_for_label }}" class="form-label">Patient ID</label>
+                    {{ prescription_form.patient }}
+                    {% if prescription_form.patient.errors %}
+                        <div class="text-danger">{{ prescription_form.patient.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="mb-3">
+                    <label for="{{ prescription_form.admission.id_for_label }}" class="form-label">Admission ID</label>
+                    {{ prescription_form.admission }}
+                    {% if prescription_form.admission.errors %}
+                        <div class="text-danger">{{ prescription_form.admission.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4>Prescription Information</h4>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="{{ prescription_form.rx_start_date.id_for_label }}" class="form-label">Prescription Start Date</label>
+                    {{ prescription_form.rx_start_date }}
+                    {% if prescription_form.rx_start_date.errors %}
+                        <div class="text-danger">{{ prescription_form.rx_start_date.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="mb-3">
+                    <label for="{{ prescription_form.rx_name.id_for_label }}" class="form-label">Prescription Name</label>
+                    {{ prescription_form.rx_name }}
+                    {% if prescription_form.rx_name.errors %}
+                        <div class="text-danger">{{ prescription_form.rx_name.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="mb-3">
+                    <label for="{{ prescription_form.rx_dose.id_for_label }}" class="form-label">Prescription Dose</label>
+                    {{ prescription_form.rx_dose }}
+                    {% if prescription_form.rx_dose.errors %}
+                        <div class="text-danger">{{ prescription_form.rx_dose.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <button type="submit" class="btn btn-primary">Submit Prescription</button>
+        <a href="{% url 'data_entry:entry_selection' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+    <script>
+        window.admissionsDropdownConfig = {
+            patientSelector: '#id_patient',  // Django's auto-generated ID for patient field
+            admissionSelector: '#id_admission',  // Django's auto-generated ID for admission field
+            apiEndpoint: "{% url 'get_admissions' %}"  // Use the URL tag to generate the correct URL
+        };
+    </script>
+    <script src="{% static 'js/admissions_dropdown.js' %}"></script>
+{% endblock %}

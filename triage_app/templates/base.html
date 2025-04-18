@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    {% load static %}
+    <title>{% block title %}Triage App{% endblock %}</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+<nav class="navbar navbar-light bg-light">
+    <div class="container-fluid">
+        <div class="navbar-header">
+               <a class="navbar-brand" href="{% url 'home' %}">Triage App</a>
+        </div>
+        <ul class="nav navbar-nav navbar-right">
+            {% if user.is_authenticated %}
+            <li>
+                 <a class="btn btn-link" href="#">{{ user.username }}</a>
+                 <a class="btn btn-link" href="{% url 'accounts:logout' %}">Logout</a>
+            </li>
+            {% else %}
+            <li>
+                 <form class="form-inline" action="{% url 'accounts:login' %}" method="post">
+                    {% csrf_token %}
+                    <div class="input-group">
+                         <input type="text" class="form-control" placeholder="CGID" name="caregiver_id" >
+                         <input type="password" class="form-control" placeholder="Password" name="password" >
+                         <button class="btn btn-primary" type="submit">Login</button>
+                    </div>
+                 </form>
+            </li>
+            {% endif %}
+        </ul>
+    </div>
+</nav>
+
+<div class="container mt-3">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+</div>
+
+<div class="container">
+    {% block content %}
+    <!-- Content will be replaced by child templates -->
+    {% endblock %}
+</div>
+
+<!-- Add jQuery and Select2 JS before closing body tag -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<!-- Include the Django Select2 script -->
+<script src="{% static 'django_select2/django_select2.js' %}"></script>
+
+{% csrf_token %}
+<script>
+    var csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    
+    $.ajaxSetup({
+        beforeSend: function(xhr, settings) {
+            if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            }
+        }
+    });
+</script>
+
+{% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load filters %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Mortality Risk Prediction</h2>
+    
+    <!-- {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{% if message.tags %}{{ message.tags }}{% else %}info{% endif %} alert-dismissible fade show">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %} -->
+    
+    <form method="post">
+        {% csrf_token %}
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4>Patient Information</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <!-- <label for="subject_id" class="form-label">Subject ID</label>
+                        <input type="text" class="form-control" id="subject_id" name="subject_id" required> -->
+                        <label for="{{ prediction_form.patient.id_for_label }}" class="form-label">Patient ID</label>
+                        {{ prediction_form.patient }}
+                        {% if prediction_form.patient.errors %}
+                            <div class="text-danger">{{ prediction_form.patient.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <!-- <label for="admission_id" class="form-label">Admission ID</label>
+                        <input type="text" class="form-control" id="admission_id" name="admission_id" required> -->
+                        <label for="{{ prediction_form.admission.id_for_label }}" class="form-label">Admission ID</label>
+                        {{ prediction_form.admission }}
+                        {% if prediction_form.admission.errors %}
+                            <div class="text-danger">{{ prediction_form.admission.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div style="display: none;">
+                        {{ prediction_form.notes }}
+                        {{ prediction_form.prescriptions }}
+                    </div>
+                </div>
+                <!-- <button type="submit" class="btn btn-primary">Generate Prediction</button> -->
+            </div>
+        </div>
+        
+
+        <button type="submit" class="btn btn-primary">Generate Prediction</button>
+        <a href="{% url 'home' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+
+        {% if prediction.mortality_risk %}
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                Prediction Results
+            </div>
+            <div class="card-body">
+                <h5 class="card-title">Patient: {{ prediction.patient }}</h5>
+                <h6 class="card-subtitle mb-2 text-muted">Admission: {{ prediction.admission }}</h6>
+                
+                <div class="alert alert-warning mt-3">
+                    <h4 class="alert-heading">Mortality Risk: {{ prediction.mortality_risk|multiply:100|floatformat:2 }}%</h4>
+                </div>
+                
+                <!-- <h6>Key Risk Factors:</h6>
+                <ul class="list-group">
+                    {% for factor in prediction.prediction.risk_factors %}
+                    <li class="list-group-item">{{ factor }}</li>
+                    {% endfor %}
+                </ul> -->
+            </div>
+        </div>
+        {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+    <script>
+        window.admissionsDropdownConfig = {
+            patientSelector: '#id_patient',  // Django's auto-generated ID for patient field
+            admissionSelector: '#id_admission',  // Django's auto-generated ID for admission field
+            apiEndpoint: "{% url 'get_admissions' %}"  // Use the URL tag to generate the correct URL
+        };
+    </script>
+    <script src="{% static 'js/admissions_dropdown.js' %}"></script>
+{% endblock %}

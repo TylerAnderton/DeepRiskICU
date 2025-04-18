@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="card-deck"> 
+    <div class="card" style="width: 36rem;"> 
+        <div class="card-body bg-light"> 
+            <h5 class="card-title"><a href="{% url 'data_entry:entry_selection' %}"><b>Data Entry</b></a></h5>
+        </div>
+        <div class="card-body bg-light">
+            <h5 class="card-title"><a href="{% url 'mortality_prediction:mortality_prediction' %}"><b>Mortality Risk Prediction</b></a></h5>
+        </div>
+    </div>
+</div>
+{% endblock %}

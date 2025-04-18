@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="card-deck"> 
+    <div class="card" style="width: 36rem;"> 
+        <div class="card-body bg-light"> 
+            <h5 class="card-title"><a href="{% url 'data_entry:new_patient' %}"><b>New Patient</b></a></h5>
+        </div>
+        <div class="card-body bg-light"> 
+            <h5 class="card-title"><a href="{% url 'data_entry:new_admission' %}"><b>New Admission</b></a></h5>
+        </div>
+        <div class="card-body bg-light">
+            <h5 class="card-title"><a href="{% url 'data_entry:new_prescription' %}"><b>New Prescription</b></a></h5>
+        </div>
+        <div class="card-body bg-light">
+            <h5 class="card-title"><a href="{% url 'data_entry:new_note' %}"><b>New Note</b></a></h5>
+        </div>
+    </div>
+</div>
+{% endblock %}
