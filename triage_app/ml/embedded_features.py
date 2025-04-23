@@ -14,6 +14,8 @@ def get_bert_embeddings(texts:list[str], model, tokenizer, batch_size=32, tokeni
         print('Using CUDA')
         model = model.cuda()
 
+    print(f'Getting embeddings for {len(texts)} items...')
+    
     embeddings = []
     for i in range(0, len(texts), batch_size):
         batch_idx = i // batch_size

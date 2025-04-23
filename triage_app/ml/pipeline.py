@@ -1,19 +1,27 @@
-import os
 from django.conf import settings
 
 from .normal_features import get_patient_admission_data, calculate_ages, encode_categorical_features
 from .embedded_features import get_notes_data, concatenate_notes, get_note_embeddings
 from .embedded_features import get_prescriptions_data, concatenate_prescriptions, get_prescription_embeddings
 from .merge_features import merge_features, fill_missing_embeddings, assert_types
-from .inference import inference_xgb
+from .inference import inference_xgb, inference_neural
 
-ML_MODEL_DIR = os.path.join(settings.BASE_DIR, 'ml', 'models')
-ONE_HOT_ENCODER_PATH = os.path.join(ML_MODEL_DIR, 'one_hot_encoder1.joblib')
-XGBOOST_DIR = os.path.join(ML_MODEL_DIR, 'xgboost')
-XGBOOST_MODEL_PATH = os.path.join(XGBOOST_DIR, 'xgboost1.joblib')
-XGBOOST_PCA_PATH = os.path.join(XGBOOST_DIR, 'pca_objects1.joblib')
+ml_model_dir = settings.ML_MODEL_DIR
+ml_model_type = settings.ML_MODEL_TYPE
 
-EMBEDDING_COLS = ['note_embedding', 'prescription_embedding']
+one_hot_encoder_path = settings.ONE_HOT_ENCODER_PATH
+xgboost_dir = settings.XGBOOST_DIR
+xgboost_model_path = settings.XGBOOST_MODEL_PATH
+xgboost_pca_path = settings.XGBOOST_PCA_PATH
+
+neural_dir = settings.NEURAL_DIR
+neural_model_path = settings.NEURAL_MODEL_PATH
+neural_pca_dict_path = settings.NEURAL_PCA_DICT_PATH
+neural_hidden_dim = settings.NEURAL_HIDDEN_DIM
+neural_model_type = settings.NEURAL_MODEL_TYPE
+neural_dropout = settings.NEURAL_DROPOUT
+
+embedding_cols = ['note_embedding', 'prescription_embedding']
 
 def pipe(input:dict) -> float:
     patient_id = input['patient_input']['patient_id']
@@ -27,7 +35,7 @@ def pipe(input:dict) -> float:
         
     patient_admission_data = get_patient_admission_data(input)
     patient_admission_data = calculate_ages(patient_admission_data)
-    patient_admission_features = encode_categorical_features(patient_admission_data, ONE_HOT_ENCODER_PATH)
+    patient_admission_features = encode_categorical_features(patient_admission_data, one_hot_encoder_path)
 
     notes_data = get_notes_data(input, patient_admission_data)
     notes_concat = concatenate_notes(notes_data)
@@ -43,11 +51,23 @@ def pipe(input:dict) -> float:
         prescription_features
     )
     merged_features = fill_missing_embeddings(merged_features)
-    assert_types(merged_features, EMBEDDING_COLS)
+    assert_types(merged_features, embedding_cols)
 
-    return inference_xgb(
-        features=merged_features,
-        model_path=XGBOOST_MODEL_PATH,
-        pca_dict_path=XGBOOST_PCA_PATH,
-        embedding_cols=EMBEDDING_COLS,
-    )
+    if ml_model_type == 'xgboost':
+        return inference_xgb(
+            features=merged_features,
+            model_path=xgboost_model_path,
+            pca_dict_path=xgboost_pca_path,
+            embedding_cols=embedding_cols,
+        )
+
+    if ml_model_type == 'neural':
+        return inference_neural(
+            features=merged_features,
+            embedding_cols=embedding_cols,
+            model_path=neural_model_path,
+            pca_dict_path=neural_pca_dict_path,
+            hidden_dim=neural_hidden_dim,
+            model_type=neural_model_type,
+            dropout=neural_dropout,
+        )
