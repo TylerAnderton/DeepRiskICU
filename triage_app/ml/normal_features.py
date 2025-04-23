@@ -1,10 +1,12 @@
 import pandas as pd
 from pandas._libs.tslibs.np_datetime import OutOfBoundsDatetime
 import joblib
+import os
+from django.conf import settings
 
 from .utils import assert_unique
 
-def get_patient_admission_data(input):
+def get_patient_admission_data(input: dict) -> pd.DataFrame:
     print()
     print('Processing patient and admission data...')
     patient_data = pd.DataFrame([input['patient_input']])
@@ -48,7 +50,7 @@ def calculate_age(admit_date, birth_date):
             print(f'admission_id: {admit_date} - {birth_date} has unreasonable age difference: {year_diff}')
             return float('nan')  # Return NaN for unreasonable values
 
-def calculate_ages(patient_admission_data):
+def calculate_ages(patient_admission_data: pd.DataFrame) -> pd.DataFrame:
     patient_admission_data['age_yrs'] = patient_admission_data.apply(
         lambda row: calculate_age(row['admission_dt'], row['dob']), axis=1
     )
@@ -56,9 +58,15 @@ def calculate_ages(patient_admission_data):
     print(f'Dropping {patient_admission_data["age_yrs"].isna().sum()} NaN values in age_yrs')
     patient_admission_data.dropna(subset=['age_yrs'], inplace=True, ignore_index=True)
     
+    age_stats = pd.read_csv(os.path.join(settings.BASE_DIR, 'ml', 'data', 'training', 'age_stats.csv'))
+    age_mean = age_stats['age_mean'].values[0]
+    age_std = age_stats['age_std'].values[0]
+    
+    patient_admission_data['age_yrs'] = (patient_admission_data['age_yrs'] - age_mean) / age_std
+    
     return patient_admission_data
 
-def encode_categorical_features(patient_admission_data, encoder_path):
+def encode_categorical_features(patient_admission_data: pd.DataFrame, encoder_path: str) -> pd.DataFrame:
     print('Encoding categorical features...')
     categorical_cols = [
         'gender',

@@ -38,7 +38,7 @@ def get_bert_embeddings(texts:list[str], model, tokenizer, batch_size=32, tokeni
 
     return np.vstack(embeddings) if len(embeddings) > 0 else np.zeros((0, default_embedding_length))
 
-def get_notes_data(input, patient_admission_data):
+def get_notes_data(input: dict, patient_admission_data: pd.DataFrame) -> pd.DataFrame:
     print()
     print('Processing notes data...')
     note_admission_ids = []
@@ -73,7 +73,7 @@ def get_notes_data(input, patient_admission_data):
     
     return notes_dt
 
-def concatenate_notes(notes_dt):
+def concatenate_notes(notes_dt: pd.DataFrame) -> pd.DataFrame:
     print('Concatenating notes...')
     notes_dt['hours_since_admission'] = (notes_dt['note_dt'] - notes_dt['admission_dt']).dt.total_seconds() / 3600
     if len(notes_dt) > 0:
@@ -92,7 +92,7 @@ def concatenate_notes(notes_dt):
     
     return notes_concat
 
-def get_note_embeddings(notes_concat):
+def get_note_embeddings(notes_concat: pd.DataFrame) -> pd.DataFrame:
     print('Getting note embeddings...')
     notes_embeddings = get_bert_embeddings(
         list(notes_concat['note_text']),
@@ -113,7 +113,7 @@ def get_note_embeddings(notes_concat):
     
     return note_features
 
-def get_prescriptions_data(input):
+def get_prescriptions_data(input: dict) -> pd.DataFrame:
     print()
     print('Processing prescriptions data...')
     prescription_admission_ids = []
@@ -142,7 +142,7 @@ def get_prescriptions_data(input):
 
     return prescriptions_data
 
-def concatenate_prescriptions(prescriptions_data):
+def concatenate_prescriptions(prescriptions_data: pd.DataFrame) -> pd.DataFrame:
     print('Concatenating prescriptions...')
     def concatenate_rx_name_dose(row):
         return f"New prescription {row['rx_name']}: {row['rx_dose']}"
@@ -156,7 +156,7 @@ def concatenate_prescriptions(prescriptions_data):
 
     return prescriptions_concat
 
-def get_prescription_embeddings(prescriptions_concat):
+def get_prescription_embeddings(prescriptions_concat: pd.DataFrame) -> pd.DataFrame:
     print('Getting prescription embeddings...')
     prescriptions_embeddings = get_bert_embeddings(
         list(prescriptions_concat['prescription_text']),

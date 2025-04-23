@@ -6,7 +6,6 @@ from .embedded_features import get_prescriptions_data, concatenate_prescriptions
 from .merge_features import merge_features, fill_missing_embeddings, assert_types
 from .inference import inference_xgb, inference_neural
 
-ml_model_dir = settings.ML_MODEL_DIR
 ml_model_type = settings.ML_MODEL_TYPE
 
 one_hot_encoder_path = settings.ONE_HOT_ENCODER_PATH
@@ -21,7 +20,7 @@ neural_hidden_dim = settings.NEURAL_HIDDEN_DIM
 neural_model_type = settings.NEURAL_MODEL_TYPE
 neural_dropout = settings.NEURAL_DROPOUT
 
-embedding_cols = ['note_embedding', 'prescription_embedding']
+embedding_cols = settings.EMBEDDING_COLS
 
 def pipe(input:dict) -> float:
     patient_id = input['patient_input']['patient_id']

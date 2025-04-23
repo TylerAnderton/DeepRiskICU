@@ -5,4 +5,4 @@ venv/
 **/feature-embeddings/
 
 # Unfinished and currently useless test files
-triage_app/ml/tests/
+# triage_app/ml/tests/
