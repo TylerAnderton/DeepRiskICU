@@ -7,36 +7,102 @@ import torch
 from .utils import assert_unique
 
 clinicalBERT = AutoModel.from_pretrained("emilyalsentzer/Bio_ClinicalBERT")
-clinicalBERT_tokenizer = AutoTokenizer.from_pretrained("emilyalsentzer/Bio_ClinicalBERT")
+clinicalBERT_tokenizer = AutoTokenizer.from_pretrained("emilyalsentzer/Bio_ClinicalBERT", use_fast=True)
 
-def get_bert_embeddings(texts:list[str], model, tokenizer, batch_size=32, tokenizer_max_length=512, default_embedding_length=768) -> np.ndarray:
+# def get_bert_embeddings(texts:list[str], model, tokenizer, batch_size=32, tokenizer_max_length=512, default_embedding_length=768) -> np.ndarray:
+#     if torch.cuda.is_available():
+#         print('Using CUDA')
+#         model = model.cuda()
+
+#     print(f'Getting embeddings for {len(texts)} items...')
+    
+#     embeddings = []
+#     for i in range(0, len(texts), batch_size):
+#         batch_idx = i // batch_size
+#         if batch_idx % 20 == 0: # Print every 50 batches
+#             print(f'Processing batch {batch_idx} of {len(texts) // batch_size}')
+            
+#         batch_texts = texts[i:i+batch_size]
+#         inputs = tokenizer(batch_texts, padding="max_length", truncation=True, 
+#                           max_length=tokenizer_max_length, return_tensors="pt")  # Reduced max_length
+        
+#         # Move to GPU if available
+#         if torch.cuda.is_available():
+#             inputs = {k: v.cuda() for k, v in inputs.items()}
+            
+#         with torch.no_grad():
+#             outputs = model(**inputs)
+        
+#         batch_embeddings = outputs.last_hidden_state.mean(dim=1).cpu().numpy()
+#         embeddings.append(batch_embeddings)
+
+#     return np.vstack(embeddings) if len(embeddings) > 0 else np.zeros((0, default_embedding_length))
+
+
+def chunk_input_ids(input_ids, tokenizer, max_length, stride):
+    chunks = []
+    for start in range(0, len(input_ids), stride):
+        end = start + max_length
+        chunk = input_ids[start:end]
+        if len(chunk) < max_length:
+            # Pad the chunk if necessary
+            chunk = torch.cat([
+                chunk,
+                torch.full((max_length - len(chunk),), tokenizer.pad_token_id, dtype=torch.long)
+            ])
+        chunks.append(chunk)
+        if end >= len(input_ids):
+            break
+    return chunks
+
+
+def get_embeddings_chunked(texts, model, tokenizer, batch_size=32, tokenizer_max_length=512, stride=256):
     if torch.cuda.is_available():
         print('Using CUDA')
         model = model.cuda()
 
-    print(f'Getting embeddings for {len(texts)} items...')
-    
-    embeddings = []
-    for i in range(0, len(texts), batch_size):
-        batch_idx = i // batch_size
-        if batch_idx % 20 == 0: # Print every 50 batches
-            print(f'Processing batch {batch_idx} of {len(texts) // batch_size}')
-            
-        batch_texts = texts[i:i+batch_size]
-        inputs = tokenizer(batch_texts, padding="max_length", truncation=True, 
-                          max_length=tokenizer_max_length, return_tensors="pt")  # Reduced max_length
-        
-        # Move to GPU if available
+    if tokenizer.pad_token is None:
+        tokenizer.add_special_tokens({'pad_token': '[PAD]'})
+        model.resize_token_embeddings(len(tokenizer))
+
+    all_chunks = []
+    chunk_to_text_idx = []
+
+    # Step 1: Chunk each text and keep track of which text each chunk belongs to
+    for idx, text in enumerate(texts):
+        input_ids = tokenizer(
+            text,
+            return_tensors="pt",
+            truncation=False,
+            add_special_tokens=False
+        )["input_ids"][0]
+
+        chunks = chunk_input_ids(input_ids, tokenizer, tokenizer_max_length, stride)
+        all_chunks.extend(chunks)
+        chunk_to_text_idx.extend([idx] * len(chunks))
+
+    # Step 2: Batch all chunks for efficient processing
+    embeddings_per_text = [[] for _ in texts]
+    for i in range(0, len(all_chunks), batch_size):
+        batch_chunks = all_chunks[i:i+batch_size]
+        batch_input_ids = torch.stack(batch_chunks)
+        inputs = {"input_ids": batch_input_ids}
+
         if torch.cuda.is_available():
             inputs = {k: v.cuda() for k, v in inputs.items()}
-            
+
         with torch.no_grad():
             outputs = model(**inputs)
-        
-        batch_embeddings = outputs.last_hidden_state.mean(dim=1).cpu().numpy()
-        embeddings.append(batch_embeddings)
 
-    return np.vstack(embeddings) if len(embeddings) > 0 else np.zeros((0, default_embedding_length))
+        batch_embeddings = outputs.last_hidden_state.mean(dim=1).cpu().numpy()
+        batch_text_indices = chunk_to_text_idx[i:i+batch_size]
+
+        for emb, text_idx in zip(batch_embeddings, batch_text_indices):
+            embeddings_per_text[text_idx].append(emb)
+
+    # Step 3: Aggregate (mean) chunk embeddings for each original text
+    final_embeddings = [np.mean(chunks, axis=0) for chunks in embeddings_per_text]
+    return np.vstack(final_embeddings)
 
 def get_notes_data(input: dict, patient_admission_data: pd.DataFrame) -> pd.DataFrame:
     print()
@@ -94,7 +160,7 @@ def concatenate_notes(notes_dt: pd.DataFrame) -> pd.DataFrame:
 
 def get_note_embeddings(notes_concat: pd.DataFrame) -> pd.DataFrame:
     print('Getting note embeddings...')
-    notes_embeddings = get_bert_embeddings(
+    notes_embeddings = get_embeddings_chunked(
         list(notes_concat['note_text']),
         clinicalBERT,
         clinicalBERT_tokenizer,
@@ -158,7 +224,7 @@ def concatenate_prescriptions(prescriptions_data: pd.DataFrame) -> pd.DataFrame:
 
 def get_prescription_embeddings(prescriptions_concat: pd.DataFrame) -> pd.DataFrame:
     print('Getting prescription embeddings...')
-    prescriptions_embeddings = get_bert_embeddings(
+    prescriptions_embeddings = get_embeddings_chunked(
         list(prescriptions_concat['prescription_text']),
         clinicalBERT,
         clinicalBERT_tokenizer,
