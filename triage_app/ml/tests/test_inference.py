@@ -77,7 +77,7 @@ class InferenceTestCase(MLTestCase):
                 pca_dict_path=xgboost_pca_path,
                 embedding_cols=embedding_cols,
             )
-            self.assertAlmostEqual(result, 0.0043, delta=0.001)
+            self.assertAlmostEqual(result, 0.1973, delta=0.001)
 
         if ml_model_type == 'neural':
             result = inference_neural(
@@ -89,4 +89,4 @@ class InferenceTestCase(MLTestCase):
                 model_type=neural_model_type,
                 dropout=neural_dropout,
             )
-            self.assertAlmostEqual(result, 0.0513, delta=0.001)
+            self.assertAlmostEqual(result, 0.0633, delta=0.001)

@@ -140,17 +140,23 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # ML Inference
 ML_MODEL_DIR = os.path.join(BASE_DIR, 'ml', 'models')
+
 # ML_MODEL_TYPE = 'xgboost'
 ML_MODEL_TYPE = 'neural'
 
-ONE_HOT_ENCODER_PATH = os.path.join(ML_MODEL_DIR, 'one_hot_encoder1.joblib')
-XGBOOST_DIR = os.path.join(ML_MODEL_DIR, 'xgboost')
-XGBOOST_MODEL_PATH = os.path.join(XGBOOST_DIR, 'xgboost1.joblib')
-XGBOOST_PCA_PATH = os.path.join(XGBOOST_DIR, 'pca_objects1.joblib')
+# EMBEDDING_TYPE = 'clinicalBERT-unchunked'
+EMBEDDING_TYPE = 'clinicalBERT-chunked'
+# EMBEDDING_TYPE = 'biomedLM-chunked'
 
-NEURAL_DIR = os.path.join(ML_MODEL_DIR, 'neural_classifier')
-NEURAL_MODEL_PATH = os.path.join(NEURAL_DIR, 'hd256_medium_lr0.01_bs8192_dr0.5_ep100_bce_sp3_es10_mpFalse.pth')
-NEURAL_PCA_DICT_PATH = os.path.join(NEURAL_DIR, 'pca_objects1.joblib')
+ONE_HOT_ENCODER_PATH = os.path.join(ML_MODEL_DIR, 'one_hot_encoder1.joblib')
+
+XGBOOST_DIR = os.path.join(ML_MODEL_DIR, EMBEDDING_TYPE, 'xgboost')
+XGBOOST_MODEL_PATH = os.path.join(XGBOOST_DIR, 'xgboost2_pca99.joblib')
+XGBOOST_PCA_PATH = os.path.join(XGBOOST_DIR, 'pca_objects99.joblib')
+
+NEURAL_DIR = os.path.join(ML_MODEL_DIR, EMBEDDING_TYPE, 'neural_classifier')
+NEURAL_MODEL_PATH = os.path.join(NEURAL_DIR, 'hd256_medium_lr0.01_bs8192_dr0.5_ep100_bce_sp3_es10_mpFalse_pca0.99.pth')
+NEURAL_PCA_DICT_PATH = os.path.join(NEURAL_DIR, 'pca_objects99.joblib')
 NEURAL_HIDDEN_DIM = 256
 NEURAL_MODEL_TYPE = 'medium'
 NEURAL_DROPOUT = 0.5

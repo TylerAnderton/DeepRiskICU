@@ -125,6 +125,8 @@ def get_notes_data(input: dict, patient_admission_data: pd.DataFrame) -> pd.Data
 
     notes_data = pd.DataFrame(notes_input)
 
+    print(f"Found {len(notes_data)} notes")
+
     notes_data['note_dt'] = pd.to_datetime(notes_data['note_dt'])
     notes_data['note_dt'] = notes_data['note_dt'].dt.tz_localize(None)
 
@@ -160,6 +162,10 @@ def concatenate_notes(notes_dt: pd.DataFrame) -> pd.DataFrame:
 
 def get_note_embeddings(notes_concat: pd.DataFrame) -> pd.DataFrame:
     print('Getting note embeddings...')
+
+    if len(notes_concat) == 0:
+        return pd.DataFrame({'admission_id': [], 'note_embedding': []})
+    
     notes_embeddings = get_embeddings_chunked(
         list(notes_concat['note_text']),
         clinicalBERT,
@@ -202,6 +208,8 @@ def get_prescriptions_data(input: dict) -> pd.DataFrame:
     }
 
     prescriptions_data = pd.DataFrame(prescriptions_input)
+    
+    print(f"Found {len(prescriptions_data)} prescriptions")
 
     prescriptions_data['rx_start_date'] = pd.to_datetime(prescriptions_data['rx_start_date'])
     prescriptions_data['rx_start_date'] = prescriptions_data['rx_start_date'].dt.tz_localize(None)
@@ -224,6 +232,10 @@ def concatenate_prescriptions(prescriptions_data: pd.DataFrame) -> pd.DataFrame:
 
 def get_prescription_embeddings(prescriptions_concat: pd.DataFrame) -> pd.DataFrame:
     print('Getting prescription embeddings...')
+
+    if len(prescriptions_concat) == 0:
+        return pd.DataFrame({'admission_id': [], 'prescription_embedding': []})
+    
     prescriptions_embeddings = get_embeddings_chunked(
         list(prescriptions_concat['prescription_text']),
         clinicalBERT,
