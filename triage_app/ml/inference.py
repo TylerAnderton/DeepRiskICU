@@ -124,7 +124,7 @@ def inference_neural(
         dropout=dropout,
     ).to(device)
 
-    model.load_state_dict(torch.load(model_path))
+    model.load_state_dict(torch.load(model_path, map_location=device))
     model.eval()
 
     with torch.no_grad():
