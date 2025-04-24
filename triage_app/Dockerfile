@@ -16,10 +16,11 @@ RUN pip install --upgrade pip && pip install -r requirements.txt
 COPY . /app/
 
 # Collect static files (optional, for production)
-# RUN python manage.py collectstatic --noinput
+RUN python manage.py collectstatic --noinput
 
 # Expose the port your app runs on (default Django port)
 EXPOSE 8000
 
 # Start the Django server
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+# CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+CMD ["gunicorn", "triage_app.wsgi:application", "--bind", "0.0.0.0:8000"]

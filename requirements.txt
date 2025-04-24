@@ -13,6 +13,7 @@ executing==2.2.0
 filelock==3.18.0
 fsspec==2025.3.2
 grpcio==1.71.0
+gunicorn==23.0.0
 huggingface-hub==0.30.2
 idna==3.10
 ipykernel==6.29.5
