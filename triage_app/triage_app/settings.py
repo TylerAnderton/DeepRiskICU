@@ -149,8 +149,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # ML Inference
 ML_MODEL_DIR = os.path.join(BASE_DIR, 'ml', 'models')
 
-# ML_MODEL_TYPE = 'xgboost'
-ML_MODEL_TYPE = 'neural'
+ML_MODEL_TYPE = 'xgboost'
+# ML_MODEL_TYPE = 'neural'
 
 # EMBEDDING_TYPE = 'clinicalBERT-unchunked'
 EMBEDDING_TYPE = 'clinicalBERT-chunked'
@@ -159,7 +159,7 @@ EMBEDDING_TYPE = 'clinicalBERT-chunked'
 ONE_HOT_ENCODER_PATH = os.path.join(ML_MODEL_DIR, 'one_hot_encoder1.joblib')
 
 XGBOOST_DIR = os.path.join(ML_MODEL_DIR, EMBEDDING_TYPE, 'xgboost')
-XGBOOST_MODEL_PATH = os.path.join(XGBOOST_DIR, 'xgboost2_pca99.joblib')
+XGBOOST_MODEL_PATH = os.path.join(XGBOOST_DIR, 'xgboost3_pca99.joblib')
 XGBOOST_PCA_PATH = os.path.join(XGBOOST_DIR, 'pca_objects99.joblib')
 
 NEURAL_DIR = os.path.join(ML_MODEL_DIR, EMBEDDING_TYPE, 'neural_classifier')
