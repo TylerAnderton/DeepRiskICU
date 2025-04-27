@@ -149,8 +149,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # ML Inference
 ML_MODEL_DIR = os.path.join(BASE_DIR, 'ml', 'models')
 
-# ML_MODEL_TYPE = 'xgboost'
-ML_MODEL_TYPE = 'neural'
+ML_MODEL_TYPE = 'xgboost'
+# ML_MODEL_TYPE = 'neural'
 
 # EMBEDDING_TYPE = 'clinicalBERT-unchunked'
 EMBEDDING_TYPE = 'clinicalBERT-chunked'
