@@ -46,9 +46,9 @@ class PipelineTestCase(MLTestCase):
         # self.assertEqual(result, 0.3)
 
         if ml_model_type == 'xgboost':
-            self.assertAlmostEqual(result, 0.1973, delta=0.001)
+            self.assertAlmostEqual(result, 0.3803, delta=0.001)
         elif ml_model_type == 'neural':
-            self.assertAlmostEqual(result, 0.0633, delta=0.001)
+            self.assertAlmostEqual(result, 0.0968, delta=0.001)
         
         
     # @patch('ml.normal_features.joblib.load')

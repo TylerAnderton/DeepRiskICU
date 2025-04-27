@@ -1,5 +1,5 @@
 import numpy as np
-from unittest.mock import patch
+# from unittest.mock import patch
 
 from ..pipeline import get_patient_admission_data, calculate_ages
 from ..embedded_features import get_notes_data, concatenate_notes, get_note_embeddings

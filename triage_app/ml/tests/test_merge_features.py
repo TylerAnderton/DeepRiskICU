@@ -1,11 +1,15 @@
 import numpy as np
 import pandas as pd
 
+from django.conf import settings
+
 from ..pipeline import get_patient_admission_data, calculate_ages, encode_categorical_features
 from ..embedded_features import get_notes_data, concatenate_notes, get_note_embeddings
 from ..embedded_features import get_prescriptions_data, concatenate_prescriptions, get_prescription_embeddings
 from ..merge_features import merge_features, fill_missing_embeddings
 from .pipeline_test_case import MLTestCase, EMBEDDINGS_LENGTH
+
+one_hot_encoder_path = settings.ONE_HOT_ENCODER_PATH
 
 class MergeFeaturesTestCase(MLTestCase):
     @classmethod

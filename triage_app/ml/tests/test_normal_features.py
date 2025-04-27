@@ -1,8 +1,12 @@
 import pandas as pd
-from unittest.mock import patch
+# from unittest.mock import patch
+
+from django.conf import settings
 
 from ..normal_features import get_patient_admission_data, calculate_ages, encode_categorical_features
 from .pipeline_test_case import MLTestCase
+
+one_hot_encoder_path = settings.ONE_HOT_ENCODER_PATH
 
 class NormalFeaturesTestCase(MLTestCase):
     @classmethod
@@ -34,7 +38,7 @@ class NormalFeaturesTestCase(MLTestCase):
         
         patient_data = get_patient_admission_data(self.sample_input)
         patient_data = calculate_ages(patient_data)
-        result = encode_categorical_features(patient_data, "dummy_path")
+        result = encode_categorical_features(patient_data, one_hot_encoder_path)
         
         self.assertIn('gender_male', result.columns)
         self.assertNotIn('gender', result.columns)  # Original column should be dropped

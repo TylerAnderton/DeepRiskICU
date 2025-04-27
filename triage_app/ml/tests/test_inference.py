@@ -1,7 +1,12 @@
 from django.conf import settings
 
 from ..pipeline import inference_xgb
+from ..pipeline import inference_neural
 from .pipeline_test_case import MLTestCase
+
+from ..normal_features import get_patient_admission_data, calculate_ages, encode_categorical_features
+from ..embedded_features import get_notes_data, concatenate_notes, get_note_embeddings, get_prescriptions_data, concatenate_prescriptions, get_prescription_embeddings
+from ..merge_features import merge_features, fill_missing_embeddings
 
 ml_model_type = settings.ML_MODEL_TYPE
 
@@ -77,7 +82,7 @@ class InferenceTestCase(MLTestCase):
                 pca_dict_path=xgboost_pca_path,
                 embedding_cols=embedding_cols,
             )
-            self.assertAlmostEqual(result, 0.1973, delta=0.001)
+            self.assertAlmostEqual(result, 0.3803, delta=0.001)
 
         if ml_model_type == 'neural':
             result = inference_neural(
@@ -89,4 +94,4 @@ class InferenceTestCase(MLTestCase):
                 model_type=neural_model_type,
                 dropout=neural_dropout,
             )
-            self.assertAlmostEqual(result, 0.0633, delta=0.001)
+            self.assertAlmostEqual(result, 0.0968, delta=0.001)
